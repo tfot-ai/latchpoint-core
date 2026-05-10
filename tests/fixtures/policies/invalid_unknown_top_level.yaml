@@ -1,0 +1,7 @@
+name: unknown_top_level_pack
+version: "0.1.0"
+gates:
+  - name: only_gate
+    trigger: pre_execution
+    conditions: []
+note: "should be rejected by strict top-level"

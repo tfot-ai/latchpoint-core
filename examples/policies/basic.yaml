@@ -1,0 +1,13 @@
+name: basic_demo
+version: "0.1.0"
+description: "Basic demo policy. Blocks high-risk destructive ops on T3+."
+gates:
+  - name: high_risk_destructive_block
+    trigger: pre_execution
+    action_on_fail: BLOCK
+    applies_to: [T3, T4]
+    conditions:
+      - type: denylist
+        field: type
+        operator: in
+        value: ["filesystem.delete"]

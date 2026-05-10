@@ -1,0 +1,9 @@
+name: duplicate_gates_pack
+version: "0.1.0"
+gates:
+  - name: same_gate
+    trigger: pre_execution
+    conditions: []
+  - name: same_gate
+    trigger: post_execution
+    conditions: []

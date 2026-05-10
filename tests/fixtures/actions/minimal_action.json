@@ -1,0 +1,13 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "type": "file.read",
+  "target": "tmp/example.txt",
+  "risk_tier": "T1",
+  "timestamp": "2026-01-01T00:00:00+00:00",
+  "agent_id": "test-agent-minimal",
+  "session_id": "test-session-minimal",
+  "inputs": {
+    "path": "tmp/example.txt"
+  },
+  "reversibility": true
+}

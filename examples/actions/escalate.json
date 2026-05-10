@@ -1,0 +1,13 @@
+{
+  "id": "00000000-0000-4000-8000-000000000a03",
+  "type": "policy.modify",
+  "target": "tmp/example_policy.yaml",
+  "risk_tier": "T4",
+  "timestamp": "2026-01-01T00:00:00+00:00",
+  "agent_id": "demo-agent-escalate",
+  "session_id": "demo-session-escalate",
+  "inputs": {
+    "path": "tmp/example_policy.yaml"
+  },
+  "reversibility": false
+}

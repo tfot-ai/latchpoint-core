@@ -1,0 +1,17 @@
+name: gate_eval_basic
+version: "0.1.0"
+description: "Basic evaluator fixture: always-pass plus a tier-scoped block."
+gates:
+  - name: always_pass
+    trigger: pre_execution
+    action_on_fail: BLOCK
+    conditions: []
+  - name: high_risk_block
+    trigger: pre_execution
+    action_on_fail: BLOCK
+    applies_to: [T3, T4]
+    conditions:
+      - type: threshold
+        field: risk_tier
+        operator: ">="
+        value: T3

@@ -1,0 +1,12 @@
+name: diff_demo
+version: "0.1.0"
+description: "Diff-mode demo policy. One regex gate over inputs.added_lines for explicit machine-local home-path detection inside the diff."
+gates:
+  - name: machine_local_path_in_added_lines
+    trigger: pre_execution
+    action_on_fail: BLOCK
+    conditions:
+      - type: regex
+        field: inputs.added_lines
+        operator: matches
+        value: "/Users/[A-Za-z0-9_.\\-]+/"

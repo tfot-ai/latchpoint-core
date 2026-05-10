@@ -1,0 +1,13 @@
+{
+  "id": "00000000-0000-4000-8000-000000000a02",
+  "type": "filesystem.delete",
+  "target": "tmp/old-output.bin",
+  "risk_tier": "T3",
+  "timestamp": "2026-01-01T00:00:00+00:00",
+  "agent_id": "demo-agent-risky",
+  "session_id": "demo-session-risky",
+  "inputs": {
+    "path": "tmp/old-output.bin"
+  },
+  "reversibility": false
+}

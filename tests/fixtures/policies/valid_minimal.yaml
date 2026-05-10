@@ -1,0 +1,6 @@
+name: minimal_pack
+version: "0.1.0"
+gates:
+  - name: log_only_gate
+    trigger: post_execution
+    conditions: []

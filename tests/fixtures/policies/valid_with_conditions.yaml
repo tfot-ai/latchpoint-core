@@ -1,0 +1,42 @@
+name: conditions_pack
+version: "1.2.0"
+description: "Covers threshold, allowlist, custom, and any_of."
+author: "Latchpoint"
+gates:
+  - name: high_risk_block
+    trigger: pre_execution
+    action_on_fail: BLOCK
+    applies_to: [T3, T4]
+    conditions:
+      - type: threshold
+        field: risk_tier
+        operator: ">="
+        value: T3
+      - any_of:
+          - type: allowlist
+            field: action_type
+            operator: in
+            value: ["network.write", "filesystem.write"]
+          - type: custom
+            field: payload.signature
+            operator: is_null
+            value: true
+  - name: post_log
+    trigger: post_execution
+    action_on_fail: LOG
+    conditions:
+      - type: regex
+        field: action_id
+        operator: matches
+        value: "^[a-z0-9_-]+$"
+risk_tier_overrides:
+  T2:
+    require_evidence: true
+  T3:
+    require_evidence: true
+    require_human_approval: true
+escalation_rules:
+  default_timeout_seconds: 300
+  default_action_on_timeout: BLOCK
+metadata:
+  origin: "spec_derived_test_fixture"

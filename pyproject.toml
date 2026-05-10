@@ -1,0 +1,25 @@
+[project]
+name = "latchpoint-core"
+version = "0.0.1"
+description = "Deterministic governance layer for agent-generated software."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6.0"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+latchpoint-core = "latchpoint_core.demo_cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

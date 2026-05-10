@@ -1,0 +1,13 @@
+diff --git a/src/loader.py b/src/loader.py
+index 0000003..0000004 100644
+--- a/src/loader.py
++++ b/src/loader.py
+@@ -1,5 +1,7 @@
+ def load_secrets():
+-    return {}
++    # convenience default for local dev
++    path = "/Users/example/project/SECRETS.txt"
++    return open(path).read()
+
+ def main():
+     print(load_secrets())
