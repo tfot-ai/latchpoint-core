@@ -6,6 +6,11 @@ license = "Apache-2.0"
 requires-python = ">=3.11"
 dependencies = ["PyYAML>=6.0"]
 
+[project.urls]
+Homepage = "https://latchpoint.ai"
+Repository = "https://github.com/tfot-ai/latchpoint-core"
+Issues = "https://github.com/tfot-ai/latchpoint-core/issues"
+
 [project.optional-dependencies]
 test = ["pytest"]
 dev = ["pytest", "ruff"]
