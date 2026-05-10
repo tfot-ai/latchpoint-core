@@ -1,5 +1,6 @@
 # Latchpoint Core
 
+[![tests](https://github.com/tfot-ai/latchpoint-core/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/tfot-ai/latchpoint-core/actions/workflows/tests.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 
