@@ -151,6 +151,16 @@ recognizes as canonical.
 
 ## Policy example
 
+A Latchpoint policy is the rulebook the engine uses to evaluate a
+proposed agent code change. It is a Latchpoint-specific YAML file,
+not a generic ADR, OpenAPI spec, Terraform policy, Rego policy, CI
+workflow, or linter config. The building blocks — gates, conditions,
+allowlists, denylists, regexes, thresholds, and risk tiers — come
+from familiar policy-as-code ideas; the field names, operator
+alphabet, and verdict vocabulary are specific to this engine. Writing
+one means deciding which deterministic checks must run before an
+action is allowed to apply.
+
 `examples/policies/basic.yaml`:
 
 ```yaml
