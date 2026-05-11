@@ -201,6 +201,10 @@ for the full schema.
 
 See [`docs/limitations.md`](docs/limitations.md) for the full list.
 
+## Further reading
+
+- [`docs/cli.md`](docs/cli.md) — the basic CLI reference.
+
 ## Development
 
 ```bash
