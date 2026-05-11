@@ -149,7 +149,7 @@ compatibility, so do not rely on verification rejecting arbitrary unknown
 fields. The guarantee is bounded by what the verifier's schema today
 recognizes as canonical.
 
-## Policy example
+## What is a policy?
 
 A Latchpoint policy is the rulebook the engine uses to evaluate a
 proposed agent code change. It is a Latchpoint-specific YAML file,
@@ -160,6 +160,8 @@ from familiar policy-as-code ideas; the field names, operator
 alphabet, and verdict vocabulary are specific to this engine. Writing
 one means deciding which deterministic checks must run before an
 action is allowed to apply.
+
+### Example
 
 `examples/policies/basic.yaml`:
 
