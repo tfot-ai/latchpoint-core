@@ -203,7 +203,14 @@ See [`docs/limitations.md`](docs/limitations.md) for the full list.
 
 ## Further reading
 
-- [`docs/cli.md`](docs/cli.md) — the basic CLI reference.
+- [`docs/quickstart.md`](docs/quickstart.md) — install, run, verify, replay, and tamper-detect in a few minutes.
+- [`docs/concepts.md`](docs/concepts.md) — the vocabulary the CLI, docs, and Python API share.
+- [`docs/policies.md`](docs/policies.md) — full policy schema, with worked examples.
+- [`docs/cli.md`](docs/cli.md) — the basic CLI reference for `check` and `verify` modes.
+- [`docs/diff-input.md`](docs/diff-input.md) — accepted unified-diff shapes and the synthesised-action fields.
+- [`docs/evidence.md`](docs/evidence.md) — evidence-pack schema, `pack_hash` derivation, tamper-detection scope.
+- [`docs/limitations.md`](docs/limitations.md) — the full list of what Latchpoint Core does not do.
+- [`docs/troubleshooting.md`](docs/troubleshooting.md) — recovery for the most common policy, diff, and verify failures.
 
 ## Development
 

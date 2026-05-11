@@ -106,6 +106,8 @@ Returns `verify_status: FAIL` and exit code `2`.
 
 - [`concepts.md`](concepts.md) — vocabulary.
 - [`policies.md`](policies.md) — full policy schema.
+- [`cli.md`](cli.md) — the basic CLI reference.
 - [`diff-input.md`](diff-input.md) — diff acceptance rules.
 - [`evidence.md`](evidence.md) — evidence pack schema and replay.
 - [`limitations.md`](limitations.md) — what Latchpoint Core does not do.
+- [`troubleshooting.md`](troubleshooting.md) — recovery for the most common failures.
