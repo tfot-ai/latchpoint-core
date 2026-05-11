@@ -110,5 +110,5 @@ detection claim.
 
 | Code | Meaning |
 |---|---|
-| `0` | Hash PASS and (`REPLAY_PASS` or `NOT_REPLAYABLE`). |
-| `2` | Hash FAIL, replay FAIL, malformed input, missing file, or unreadable file. |
+| `0` | `verify_status: PASS` and (`REPLAY_PASS` or `NOT_REPLAYABLE`). |
+| `2` | `verify_status: FAIL`, replay FAIL, malformed input, missing file, or unreadable file. |
