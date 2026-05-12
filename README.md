@@ -26,6 +26,20 @@ no clock, no randomness, no network, no platform integration.
 
 Requires Python 3.11+.
 
+### Agent install (recommended)
+
+If you use a coding agent (Claude Code, Codex, Cursor, Windsurf, or
+similar), [`AGENT_INSTALL.md`](AGENT_INSTALL.md) contains a
+copy-paste prompt that installs Latchpoint Core into a local virtual
+environment, runs the `PASS` / `FIX` / `ESCALATE` example flows,
+verifies an evidence pack, and optionally drops a starter advisory
+policy (`.latchpoint/policy.yaml`, `scripts/latchpoint-check.sh`,
+`.latchpoint/README.md`) into your current repository. The agent
+prompt does not install globally, modify CI, add git hooks, or
+commit on your behalf.
+
+### Manual install
+
 ```bash
 pip install -e .
 ```
@@ -39,18 +53,6 @@ For test extras:
 ```bash
 pip install -e '.[test]'
 ```
-
-## Agent Install
-
-If you use a coding agent (Claude Code, Codex, Cursor, Windsurf, or
-similar), [`AGENT_INSTALL.md`](AGENT_INSTALL.md) contains a
-copy-paste prompt that installs Latchpoint Core into a local virtual
-environment, runs the `PASS` / `FIX` / `ESCALATE` example flows,
-verifies an evidence pack, and optionally drops a starter advisory
-policy (`.latchpoint/policy.yaml`, `scripts/latchpoint-check.sh`,
-`.latchpoint/README.md`) into your current repository. The agent
-prompt does not install globally, modify CI, add git hooks, or
-commit on your behalf.
 
 ## Quickstart: check a structured action
 
