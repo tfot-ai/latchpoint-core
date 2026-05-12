@@ -94,7 +94,9 @@ Stop and report on any failure.
 #
 #   test ! -e latchpoint-core
 #   git clone https://github.com/tfot-ai/latchpoint-core.git
-#   cd latchpoint-core
+#   if [ -d latchpoint-core ]; then
+#     cd latchpoint-core
+#   fi
 
 # ---------------------------------------------------------------
 # STEP 2 — Create a repo-local virtual environment
