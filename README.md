@@ -31,12 +31,11 @@ Requires Python 3.11+.
 If you use a coding agent (Claude Code, Codex, Cursor, Windsurf, or
 similar), [`AGENT_INSTALL.md`](AGENT_INSTALL.md) contains a
 copy-paste prompt that installs Latchpoint Core into a local virtual
-environment, runs the `PASS` / `FIX` / `ESCALATE` example flows,
-verifies an evidence pack, and optionally drops a starter advisory
-policy (`.latchpoint/policy.yaml`, `scripts/latchpoint-check.sh`,
-`.latchpoint/README.md`) into your current repository. The agent
-prompt does not install globally, modify CI, add git hooks, or
-commit on your behalf.
+environment, runs the `PASS` / `FIX` / `ESCALATE` example flows, and
+verifies and replays an evidence pack. The prompt is install- and
+verification-only: it does not install globally, modify your shell
+configuration, modify CI, add git hooks, or commit on your behalf,
+and it does not write any file in your own repository.
 
 ### Manual install
 
