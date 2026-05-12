@@ -41,7 +41,12 @@ commit on your behalf.
 ### Manual install
 
 ```bash
-pip install -e .
+git clone https://github.com/tfot-ai/latchpoint-core.git
+cd latchpoint-core
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e .
 ```
 
 The package installs the `latchpoint-core` CLI and exposes
@@ -51,8 +56,11 @@ on `PyYAML>=6.0` only.
 For test extras:
 
 ```bash
-pip install -e '.[test]'
+python -m pip install -e '.[test]'
 ```
+
+The CLI exposes check, verify modes; see [`docs/cli.md`](docs/cli.md)
+for the full reference.
 
 ## Quickstart: check a structured action
 
