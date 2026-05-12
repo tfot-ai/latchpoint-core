@@ -107,9 +107,17 @@ Stop and report on any failure.
 # inside .venv. Do not use the system Python.
 
 # ---------------------------------------------------------------
-# STEP 3 — Install Latchpoint Core (editable)
+# STEP 3 — Install Latchpoint Core
 # ---------------------------------------------------------------
-#   python -m pip install -e .
+# Install as a regular (non-editable) package into the venv. The
+# editable mode (`pip install -e ...`) is intentionally avoided here:
+# it relies on a generated `.pth` pointer file in site-packages which,
+# on macOS, has been observed to be created with the `UF_HIDDEN` file
+# flag and silently skipped by Python's site-packages scanner. A
+# standard (non-editable) install does not depend on a `.pth` pointer
+# and is reliable on macOS, Linux, and Windows.
+#
+#   python -m pip install .
 #
 # Confirm the CLI is on PATH inside the venv:
 #
@@ -122,12 +130,9 @@ Stop and report on any failure.
 #
 # Expected output: `import ok`.
 #
-# If this fails with `ModuleNotFoundError: No module named
-# 'latchpoint_core'` on macOS, see the editable-install .pth note in
-# `docs/troubleshooting.md` (section "ModuleNotFoundError after
-# editable install on macOS"). The fix is scoped to this venv only.
-# Do not edit Latchpoint sources, reinstall outside the venv, or
-# rerun `pip install` with elevated privileges.
+# If this fails, stop and report the failing command, exit code, and
+# captured stderr. Do not edit Latchpoint sources, reinstall outside
+# the venv, or rerun `pip install` with elevated privileges.
 
 # ---------------------------------------------------------------
 # STEP 4 — Run PASS / FIX / ESCALATE examples

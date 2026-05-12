@@ -164,7 +164,11 @@ closed.
 
 This is an install-time issue, not a runtime Latchpoint Core issue.
 It has only been observed on macOS, and only with editable installs
-(`pip install -e ...`) inside a repo-local virtual environment.
+(`pip install -e ...`) inside a repo-local virtual environment. The
+primary install flows in [`README.md`](../README.md#install) and
+[`AGENT_INSTALL.md`](../AGENT_INSTALL.md) use a standard (non-editable)
+`python -m pip install .` and are not affected; this note applies
+only to developers running `pip install -e '.[dev]'`.
 
 - **Symptom.** Immediately after `pip install -e '.[test]'` reports
   success, `python -c "import latchpoint_core"` raises

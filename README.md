@@ -45,7 +45,7 @@ cd latchpoint-core
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
-python -m pip install -e .
+python -m pip install .
 ```
 
 The package installs the `latchpoint-core` CLI and exposes
@@ -55,7 +55,7 @@ on `PyYAML>=6.0` only.
 For test extras:
 
 ```bash
-python -m pip install -e '.[test]'
+python -m pip install '.[test]'
 ```
 
 The CLI exposes three deterministic offline modes — `check`, `verify`,
