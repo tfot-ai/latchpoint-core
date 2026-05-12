@@ -26,9 +26,13 @@ code.
 
 ## How to use
 
-1. Open the coding agent in the directory where you want
-   `latchpoint-core/` to be cloned. For Install + repo wiring, open
-   it at the root of the repository you want to wire.
+1. Open the coding agent:
+   - For Install-only: open it in the directory where you want
+     `latchpoint-core/` to be cloned.
+   - For Install + repo wiring: open it at the root of the
+     repository you want to wire. The agent will clone
+     `latchpoint-core/` into the **parent directory** of that repo
+     (a sibling of your repo), never inside it.
 2. Decide your mode:
    - `MODE=install-only`, or
    - `MODE=install-and-wire`.
@@ -86,10 +90,31 @@ MODE: install-only        # change to: install-and-wire   if desired
 # ---------------------------------------------------------------
 # STEP 1 — Clone Latchpoint Core
 # ---------------------------------------------------------------
-# Use the current working directory as the parent. If a
-# latchpoint-core/ directory already exists here, stop and report —
-# do not overwrite it.
+# Where to clone depends on MODE:
 #
+# - MODE=install-only:
+#     Clone into the current working directory.
+#
+# - MODE=install-and-wire:
+#     The current working directory is the user's repo root. Do NOT
+#     clone latchpoint-core/ inside the user's repo. Clone it into
+#     the PARENT directory of the user's repo so latchpoint-core/
+#     ends up as a sibling of the user's repo.
+#
+# In either mode, if a latchpoint-core/ directory already exists at
+# the target location, stop and report — do not overwrite it.
+#
+# install-only:
+#
+#   test ! -e latchpoint-core
+#   git clone https://github.com/tfot-ai/latchpoint-core.git
+#   cd latchpoint-core
+#
+# install-and-wire:
+#
+#   USER_REPO_ROOT="$(pwd)"
+#   test -d "$USER_REPO_ROOT/.git" || { echo "not a git repo — stop"; exit 1; }
+#   cd ..
 #   test ! -e latchpoint-core
 #   git clone https://github.com/tfot-ai/latchpoint-core.git
 #   cd latchpoint-core
@@ -201,9 +226,11 @@ MODE: install-only        # change to: install-and-wire   if desired
 #   already exist. If any of them already exists, leave it untouched
 #   and report which ones were skipped.
 #
-# Return to the user's repo root before creating these files:
+# Return to the user's repo root before creating these files. In
+# install-and-wire mode the user's repo is at $USER_REPO_ROOT
+# (captured in STEP 1), which is the parent of latchpoint-core/:
 #
-#   cd <user-repo-root>
+#   cd "$USER_REPO_ROOT"
 #   test -d .git || { echo "not a git repo — stop"; exit 1; }
 #
 # File 1 — .latchpoint/policy.yaml
@@ -324,8 +351,10 @@ MODE: install-only        # change to: install-and-wire   if desired
 - It will not edit files outside the three advisory files listed
   for install-and-wire mode.
 - It will not contact any network endpoint beyond the initial
-  `git clone` and `pip install` of the package and its single
-  declared dependency (`PyYAML`).
+  `git clone` and `pip install`. The only runtime dependency is
+  `PyYAML`; because STEP 3 installs the `[test]` extra,
+  `pip install` will also fetch `pytest` and its transitive
+  dependencies into the local virtual environment.
 
 ## After the agent finishes
 

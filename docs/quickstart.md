@@ -9,7 +9,12 @@ it, and demonstrates tamper detection.
 Requires Python 3.11+.
 
 ```bash
-pip install -e .
+git clone https://github.com/tfot-ai/latchpoint-core.git
+cd latchpoint-core
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e .
 ```
 
 The package installs the `latchpoint-core` CLI and exposes
