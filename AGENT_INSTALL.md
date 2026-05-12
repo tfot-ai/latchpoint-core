@@ -113,6 +113,36 @@ MODE: install-only        # change to: install-and-wire   if desired
 #
 #   which latchpoint-core
 #   latchpoint-core --help | head -n 20
+#
+# Then run an import smoke test inside the venv:
+#
+#   python -c "import latchpoint_core; print('import ok')"
+#
+# Expected output: `import ok`.
+#
+# If this fails with `ModuleNotFoundError: No module named
+# 'latchpoint_core'`, the editable install completed but Python is
+# not picking up the package. On macOS, a known cause is the
+# editable-install `.pth` file being created with the UF_HIDDEN
+# file flag set, which makes Python skip it during site-packages
+# scanning. Diagnose, scoped to this venv only:
+#
+#   ls -lO .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
+#
+# If the listing shows a `hidden` flag on the `.pth` file, clear it
+# on that file only — do not run `chflags` recursively, and do not
+# touch anything outside `.venv`:
+#
+#   chflags nohidden .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
+#
+# Rerun the import smoke test:
+#
+#   python -c "import latchpoint_core; print('import ok')"
+#
+# If the import still fails, or the `.pth` file does not show a
+# `hidden` flag, stop and report. Do not edit Latchpoint sources,
+# reinstall outside the venv, or rerun `pip install` with elevated
+# privileges. See `docs/troubleshooting.md` for the full note.
 
 # ---------------------------------------------------------------
 # STEP 4 — Verify PASS / FIX / ESCALATE

@@ -160,6 +160,55 @@ closed.
   pretty-prints it changes the bytes and causes `pack hash mismatch`
   on verify.
 
+## `ModuleNotFoundError` after editable install on macOS
+
+This is an install-time issue, not a runtime Latchpoint Core issue.
+It has only been observed on macOS, and only with editable installs
+(`pip install -e ...`) inside a repo-local virtual environment.
+
+- **Symptom.** Immediately after `pip install -e '.[test]'` reports
+  success, `python -c "import latchpoint_core"` raises
+  `ModuleNotFoundError: No module named 'latchpoint_core'`. The
+  `latchpoint-core` CLI may also fail to import the package.
+- **Likely cause.** `pip` writes an editable-install pointer file at
+  `.venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth`.
+  On macOS the file can land with the `UF_HIDDEN` flag set, and
+  Python's site-packages scanner skips `.pth` files that carry that
+  flag — so the package's source location never gets added to
+  `sys.path`. This is a platform-level file-flag interaction, not a
+  Latchpoint or `pip` bug per se, and it is not universal: many
+  macOS installs are unaffected.
+- **Diagnostic.** From the repo root, with the venv activated:
+
+  ```bash
+  ls -lO .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
+  ```
+
+  The `-O` flag prints BSD file flags. If the listing shows a
+  `hidden` flag, this issue applies. If it does not, the
+  `ModuleNotFoundError` has a different cause and the workaround
+  below will not help.
+
+- **Local venv-only fix.** Clear the hidden flag on that single
+  `.pth` file inside the repo-local venv. Do not run `chflags`
+  recursively, do not target paths outside `.venv`, and do not
+  modify the package itself:
+
+  ```bash
+  chflags nohidden .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
+  ```
+
+- **Verify.** Rerun the import smoke test from inside the same venv:
+
+  ```bash
+  python -c "import latchpoint_core; print('import ok')"
+  ```
+
+  Expected output: `import ok`. If the import still fails after
+  clearing the flag, stop — the cause is elsewhere (wrong Python on
+  PATH, a stale `.venv` from a previous interpreter, missing
+  `pip install` step) and the workaround above does not apply.
+
 ## Exit codes at a glance
 
 | Mode | Code | Meaning |
