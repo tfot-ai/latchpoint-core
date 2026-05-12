@@ -59,8 +59,9 @@ For test extras:
 python -m pip install -e '.[test]'
 ```
 
-The CLI exposes check, verify modes; see [`docs/cli.md`](docs/cli.md)
-for the full reference.
+The CLI exposes three deterministic offline modes — `check`, `verify`,
+and `run` — available both as flag-based forms and as subcommands. See
+[`docs/cli.md`](docs/cli.md) for the full reference.
 
 ## Quickstart: check a structured action
 

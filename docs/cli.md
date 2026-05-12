@@ -2,13 +2,17 @@
 
 This page documents the public, basic local CLI workflows for
 Latchpoint Core: the `check` mode that turns a policy plus an action
-or a diff into a verdict and an evidence pack, and the `verify` mode
-that hash-checks an evidence pack and optionally replays the recorded
-gate decision.
+or a diff into a verdict and an evidence pack, the `verify` mode that
+hash-checks an evidence pack and optionally replays the recorded gate
+decision, and the `run` mode that drives a JSON payload through the
+local synthetic adapter and writes the resulting evidence pack and
+per-section files to a directory.
 
-The CLI is invoked as `latchpoint-core ...`. The evaluation path
-reads no system clock, generates no randomness, and makes no network
-calls.
+The CLI is invoked as `latchpoint-core ...`. All three modes are
+available both as flag-based forms (default flat-arg form for `check`,
+`--verify` for `verify`) and as the subcommands `check`, `verify`,
+and `run`. The evaluation path reads no system clock, generates no
+randomness, and makes no network calls.
 
 ## Verdict mapping
 
@@ -169,9 +173,70 @@ latchpoint-core --verify \
   --action examples/actions/safe.json
 ```
 
+## `run` mode
+
+Loads a YAML policy, reads a JSON payload object, drives it through
+the local synthetic adapter, evaluates the gate, builds an evidence
+pack, and writes the pack and per-section files as canonical JSON to
+`--out`. The output directory must be empty or absent; the pipeline
+refuses to overwrite a non-empty directory.
+
+Selected by passing `run` as the subcommand:
+
+```bash
+latchpoint-core run --policy POLICY --payload PAYLOAD --out OUT [...]
+```
+
+### Flags
+
+| Flag            | Required | Default | Purpose                                                                                                                                            |
+|-----------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--policy`      | yes      | —       | Path to a YAML policy file.                                                                                                                        |
+| `--payload`     | yes      | —       | Path to a JSON payload file. Must be a JSON object.                                                                                                |
+| `--out`         | yes      | —       | Output directory. Must be empty or absent. The pipeline refuses to overwrite a non-empty directory.                                                |
+| `--at`          | no       | —       | Optional ISO 8601 build-time stamp recorded deterministically in the evidence pack metadata. No system clock is ever read.                         |
+| `--kill-switch` | no       | —       | Path to a JSON object with a single `state` field (`ACTIVE` \| `INACTIVE`). `ACTIVE` fails closed before policy evaluation and exits `2`.          |
+| `--override`    | no       | —       | Path to a caller-supplied override decision. Applicable overrides allow the run to continue; rejected outcomes fail closed and write no evidence.  |
+| `--ledger`      | no       | —       | Path to a JSON-array ledger chain. When supplied with an applicable `--override` and `--at`, a single `LedgerEntry` is appended after evidence write. |
+
+### Stdout
+
+```
+verdict: PASS|FIX|ESCALATE
+decision: approve|block|override_required
+reason: <one line per reason>
+gates_evaluated: <comma-separated list>
+pack_hash: <64-hex-character SHA-256>
+evidence_path: <directory path>
+```
+
+When `--override` resolves as applicable, an additional
+`override_outcome:` line is printed before `evidence_path`.
+
+### Exit codes
+
+| Code | Meaning                                                                                  |
+|------|------------------------------------------------------------------------------------------|
+| `0`  | `verdict: PASS`.                                                                          |
+| `1`  | `verdict: FIX`.                                                                           |
+| `2`  | `verdict: ESCALATE`, or any fail-closed configuration error (malformed policy, malformed payload, adapter rejection, gate evaluation error, evidence build error, `--out` non-empty, mid-write OSError). |
+
+### Example
+
+```bash
+latchpoint-core run \
+  --policy examples/policies/basic.yaml \
+  --payload examples/actions/safe.json \
+  --out ./evidence_dir
+```
+
+Writes the canonical evidence pack and per-section files into
+`./evidence_dir`. Identical inputs (same `--policy`, `--payload`, and
+`--at` when supplied) produce byte-identical output files.
+
 ## Determinism
 
-For both `check` and `verify`, identical inputs produce
+For `check`, `verify`, and `run`, identical inputs produce
 byte-identical output. The evaluation path performs no clock reads,
 no randomness, and no network access. The CLI performs local
 filesystem I/O only on the paths supplied as flag values.
