@@ -4,41 +4,23 @@ This file is an agent-native installer for Latchpoint Core. Paste the
 prompt block below into a coding agent (Claude Code, Codex, Cursor,
 Windsurf, or similar) and the agent will:
 
-1. clone and install Latchpoint Core into a local Python virtual
-   environment,
-2. verify the installation by running the `PASS`, `FIX`, and
-   `ESCALATE` example flows,
-3. optionally prepare the current repository as a local advisory
-   policy gate, without modifying CI, hooks, or unrelated code.
+1. clone Latchpoint Core,
+2. install it into a repo-local Python virtual environment,
+3. verify the install by running the `PASS`, `FIX`, and `ESCALATE`
+   example flows, writing an evidence pack, and verifying and
+   replaying it,
+4. print a final report.
 
-Two modes are supported:
-
-- **Install-only.** Clone, install, verify. The agent stops after
-  printing a verification report.
-- **Install + repo wiring.** Same as install-only, then create three
-  advisory files inside the user's current repository:
-  `.latchpoint/policy.yaml`, `scripts/latchpoint-check.sh`, and
-  `.latchpoint/README.md`. Nothing else in the repo is touched.
-
-Both modes are local, offline after the initial `git clone` and
-`pip install`, and read-only with respect to the user's existing
-code.
+Repository wiring is intentionally deferred. This prompt only
+installs and verifies Latchpoint Core. It does not touch your own
+repository, your shell configuration, CI, or any git hooks.
 
 ## How to use
 
-1. Open the coding agent:
-   - For Install-only: open it in the directory where you want
-     `latchpoint-core/` to be cloned.
-   - For Install + repo wiring: open it at the root of the
-     repository you want to wire. The agent will clone
-     `latchpoint-core/` into the **parent directory** of that repo
-     (a sibling of your repo), never inside it.
-2. Decide your mode:
-   - `MODE=install-only`, or
-   - `MODE=install-and-wire`.
-3. Copy the entire prompt block below and paste it into the agent.
-4. Replace the `MODE` line at the top of the prompt with your choice.
-5. Submit the prompt.
+1. Open the coding agent in the directory where you want
+   `latchpoint-core/` to be cloned.
+2. Copy the entire prompt block below and paste it into the agent.
+3. Submit the prompt.
 
 The agent should execute the steps in order, stop on any failure,
 and print a final report.
@@ -50,10 +32,8 @@ You are installing Latchpoint Core for the current user. Follow these
 instructions exactly. Do not improvise. Do not skip verification.
 Stop and report on any failure.
 
-MODE: install-only        # change to: install-and-wire   if desired
-
 # ---------------------------------------------------------------
-# HARD CONSTRAINTS — apply to BOTH modes
+# HARD CONSTRAINTS
 # ---------------------------------------------------------------
 # - Do not install packages globally. Use a repo-local virtual
 #   environment only.
@@ -63,58 +43,53 @@ MODE: install-only        # change to: install-and-wire   if desired
 # - Do not modify Latchpoint Core source code, evaluator semantics,
 #   or its dependencies.
 # - Do not run destructive commands (rm -rf on anything outside the
-#   newly-created latchpoint-core/ clone, force-push, reset --hard
-#   on the user's repo, etc.).
+#   newly-created latchpoint-core/ clone, force-push, reset --hard,
+#   etc.).
 # - Do not push, open pull requests, or create commits on the user's
 #   behalf.
 # - Do not write outside the paths explicitly listed in these
 #   instructions.
 # - If any step fails, stop and print: the failing command, the exit
 #   code, the captured stderr (last 50 lines), and the step number.
-#   Do not attempt to "fix forward" by editing Latchpoint sources or
-#   the user's repo.
+#   Do not attempt to "fix forward" by editing Latchpoint sources.
 
 # ---------------------------------------------------------------
 # STEP 0 — Preflight
 # ---------------------------------------------------------------
-# Run these commands and confirm each succeeds. Print the output.
+# Confirm git is available:
 #
 #   command -v git
-#   command -v python3
-#   python3 --version
 #
-# Requirement: Python 3.11 or newer. If python3 is older than 3.11,
-# stop and report. Do not attempt to install a new Python
-# interpreter on the user's system.
+# Locate a Python interpreter that is 3.11 or newer. Try the
+# explicit names first (so a system `python3` that is older than
+# 3.11 — for example Apple's system 3.9 on macOS — does not block
+# the install when a newer interpreter is already installed
+# alongside it). Use the first one that resolves and reports a
+# version >= 3.11. Do not attempt to install a new Python
+# interpreter on the user's system; only discover existing ones.
+#
+#   for cand in python3.13 python3.12 python3.11 python3; do
+#     if command -v "$cand" >/dev/null 2>&1; then
+#       ver="$("$cand" -c 'import sys;print("%d.%d"%sys.version_info[:2])')"
+#       major="${ver%.*}"; minor="${ver#*.}"
+#       if [ "$major" -ge 3 ] && [ "$minor" -ge 11 ]; then
+#         PY="$cand"
+#         break
+#       fi
+#     fi
+#   done
+#   test -n "${PY:-}" || { echo "no python >= 3.11 found"; exit 1; }
+#   "$PY" --version
+#
+# If no Python 3.11+ interpreter is found, stop and report. Do not
+# attempt to install one.
 
 # ---------------------------------------------------------------
 # STEP 1 — Clone Latchpoint Core
 # ---------------------------------------------------------------
-# Where to clone depends on MODE:
+# Clone into the current working directory. If a latchpoint-core/
+# directory already exists, stop and report — do not overwrite it.
 #
-# - MODE=install-only:
-#     Clone into the current working directory.
-#
-# - MODE=install-and-wire:
-#     The current working directory is the user's repo root. Do NOT
-#     clone latchpoint-core/ inside the user's repo. Clone it into
-#     the PARENT directory of the user's repo so latchpoint-core/
-#     ends up as a sibling of the user's repo.
-#
-# In either mode, if a latchpoint-core/ directory already exists at
-# the target location, stop and report — do not overwrite it.
-#
-# install-only:
-#
-#   test ! -e latchpoint-core
-#   git clone https://github.com/tfot-ai/latchpoint-core.git
-#   cd latchpoint-core
-#
-# install-and-wire:
-#
-#   USER_REPO_ROOT="$(pwd)"
-#   test -d "$USER_REPO_ROOT/.git" || { echo "not a git repo — stop"; exit 1; }
-#   cd ..
 #   test ! -e latchpoint-core
 #   git clone https://github.com/tfot-ai/latchpoint-core.git
 #   cd latchpoint-core
@@ -122,17 +97,19 @@ MODE: install-only        # change to: install-and-wire   if desired
 # ---------------------------------------------------------------
 # STEP 2 — Create a repo-local virtual environment
 # ---------------------------------------------------------------
-#   python3 -m venv .venv
+# Use the interpreter discovered in STEP 0 (the `$PY` variable).
+#
+#   "$PY" -m venv .venv
 #   . .venv/bin/activate
-#   python -m pip install --upgrade pip
+#   python -m pip install --upgrade pip setuptools wheel
 #
 # All subsequent python and pip invocations in this prompt run
 # inside .venv. Do not use the system Python.
 
 # ---------------------------------------------------------------
-# STEP 3 — Install Latchpoint Core (editable, with test extras)
+# STEP 3 — Install Latchpoint Core (editable)
 # ---------------------------------------------------------------
-#   pip install -e '.[test]'
+#   python -m pip install -e .
 #
 # Confirm the CLI is on PATH inside the venv:
 #
@@ -146,31 +123,14 @@ MODE: install-only        # change to: install-and-wire   if desired
 # Expected output: `import ok`.
 #
 # If this fails with `ModuleNotFoundError: No module named
-# 'latchpoint_core'`, the editable install completed but Python is
-# not picking up the package. On macOS, a known cause is the
-# editable-install `.pth` file being created with the UF_HIDDEN
-# file flag set, which makes Python skip it during site-packages
-# scanning. Diagnose, scoped to this venv only:
-#
-#   ls -lO .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
-#
-# If the listing shows a `hidden` flag on the `.pth` file, clear it
-# on that file only — do not run `chflags` recursively, and do not
-# touch anything outside `.venv`:
-#
-#   chflags nohidden .venv/lib/python*/site-packages/__editable__.latchpoint_core-*.pth
-#
-# Rerun the import smoke test:
-#
-#   python -c "import latchpoint_core; print('import ok')"
-#
-# If the import still fails, or the `.pth` file does not show a
-# `hidden` flag, stop and report. Do not edit Latchpoint sources,
-# reinstall outside the venv, or rerun `pip install` with elevated
-# privileges. See `docs/troubleshooting.md` for the full note.
+# 'latchpoint_core'` on macOS, see the editable-install .pth note in
+# `docs/troubleshooting.md` (section "ModuleNotFoundError after
+# editable install on macOS"). The fix is scoped to this venv only.
+# Do not edit Latchpoint sources, reinstall outside the venv, or
+# rerun `pip install` with elevated privileges.
 
 # ---------------------------------------------------------------
-# STEP 4 — Verify PASS / FIX / ESCALATE
+# STEP 4 — Run PASS / FIX / ESCALATE examples
 # ---------------------------------------------------------------
 # Run the three example flows shipped in examples/. Capture exit
 # codes. The expected exit codes are 0, 1, 2 respectively.
@@ -178,143 +138,49 @@ MODE: install-only        # change to: install-and-wire   if desired
 #   latchpoint-core \
 #     --policy examples/policies/basic.yaml \
 #     --action examples/actions/safe.json
-#   echo "exit=$?"
+#   echo "exit=$?"     # expected 0 — verdict: PASS
 #
 #   latchpoint-core \
 #     --policy examples/policies/basic.yaml \
 #     --action examples/actions/risky.json
-#   echo "exit=$?"
+#   echo "exit=$?"     # expected 1 — verdict: FIX
 #
 #   latchpoint-core \
 #     --policy examples/policies/basic.yaml \
 #     --action examples/actions/escalate.json
-#   echo "exit=$?"
+#   echo "exit=$?"     # expected 2 — verdict: ESCALATE
 #
-# Then write and verify an evidence pack:
+# If any exit code does not match, stop and report.
+
+# ---------------------------------------------------------------
+# STEP 5 — Write, verify, and replay an evidence pack
+# ---------------------------------------------------------------
+# Write an evidence pack from the PASS run:
 #
 #   latchpoint-core \
 #     --policy examples/policies/basic.yaml \
 #     --action examples/actions/safe.json \
 #     --evidence-out /tmp/latchpoint_evidence.json
 #
+# Capture the `pack_hash:` line from the output.
+#
+# Verify the pack hash (no policy/action — hash check only):
+#
 #   latchpoint-core --verify --evidence-in /tmp/latchpoint_evidence.json
+#   echo "exit=$?"     # expected 0 — verify_status: PASS
 #
-# Capture the `pack_hash:` line from each run. The two runs against
-# safe.json must report an identical pack_hash.
+# Verify and replay (recompute the gate decision from the original
+# policy and action and compare against the recorded one):
 #
-# Finally, run the test suite:
+#   latchpoint-core --verify \
+#     --evidence-in /tmp/latchpoint_evidence.json \
+#     --policy examples/policies/basic.yaml \
+#     --action examples/actions/safe.json
+#   echo "exit=$?"     # expected 0 — verify_status: PASS, replay_status: REPLAY_PASS
 #
-#   python -m pytest -q
-#
-# All tests must pass. If any fail, stop and report.
-
-# ---------------------------------------------------------------
-# STEP 5 — (install-and-wire ONLY) Prepare the user's repository
-# ---------------------------------------------------------------
-# Skip this step entirely when MODE=install-only.
-#
-# Hard constraints for this step:
-# - The user's repo is the directory where the agent was originally
-#   opened, NOT latchpoint-core/.
-# - Do not modify, rename, or delete any file in the user's repo
-#   other than the three files listed below.
-# - Do not stage, commit, or push.
-# - Do not modify .gitignore, CI workflows, pre-commit configs, or
-#   any git hooks. Do not install a git hook.
-# - Do not edit unrelated source code.
-# - Each of the three files must be created only if it does not
-#   already exist. If any of them already exists, leave it untouched
-#   and report which ones were skipped.
-#
-# Return to the user's repo root before creating these files. In
-# install-and-wire mode the user's repo is at $USER_REPO_ROOT
-# (captured in STEP 1), which is the parent of latchpoint-core/:
-#
-#   cd "$USER_REPO_ROOT"
-#   test -d .git || { echo "not a git repo — stop"; exit 1; }
-#
-# File 1 — .latchpoint/policy.yaml
-# A minimal starter advisory policy. The content below is a literal
-# template; do not improvise additional gates.
-#
-#     name: starter_advisory
-#     version: "0.1.0"
-#     description: "Starter advisory policy for local agent-change review. Edit before relying on it."
-#     gates:
-#       - name: machine_local_path_in_added_lines
-#         trigger: pre_execution
-#         action_on_fail: BLOCK
-#         conditions:
-#           - type: regex
-#             field: inputs.added_lines
-#             operator: matches
-#             value: "/Users/[A-Za-z0-9_.\\-]+/"
-#
-# File 2 — scripts/latchpoint-check.sh
-# An executable wrapper that runs Latchpoint Core against a diff
-# read from stdin or supplied as the first argument. It assumes the
-# user activates the same virtual environment created in STEP 2
-# (path printed at the end of this prompt). Mark it executable with
-# chmod +x.
-#
-#     #!/usr/bin/env bash
-#     # Local advisory check. Reads a unified diff from $1 or stdin.
-#     # Exit codes: 0=PASS, 1=FIX, 2=ESCALATE/error.
-#     set -u
-#     POLICY="${LATCHPOINT_POLICY:-.latchpoint/policy.yaml}"
-#     if [ "$#" -ge 1 ] && [ -f "$1" ]; then
-#       DIFF_PATH="$1"
-#     else
-#       DIFF_PATH="$(mktemp -t latchpoint-diff.XXXXXX)"
-#       cat - > "$DIFF_PATH"
-#     fi
-#     if ! command -v latchpoint-core >/dev/null 2>&1; then
-#       echo "latchpoint-core not on PATH. Activate the Latchpoint venv first." >&2
-#       exit 2
-#     fi
-#     latchpoint-core --policy "$POLICY" --diff "$DIFF_PATH"
-#
-# File 3 — .latchpoint/README.md
-# A short README inside the user's repo explaining what was added,
-# the advisory-only intent, and how to invoke the wrapper. Use this
-# template verbatim:
-#
-#     # Latchpoint (local advisory)
-#
-#     This directory contains a local advisory configuration for
-#     Latchpoint Core. It is not wired into CI, git hooks, or any
-#     automated enforcement. It is intended to be invoked manually
-#     or by a developer's local agent before applying a change.
-#
-#     ## Files
-#
-#     - `policy.yaml` — a starter advisory policy. Edit it to match
-#       the rules you want to enforce locally.
-#     - `../scripts/latchpoint-check.sh` — a wrapper that runs the
-#       policy against a unified diff. Reads the diff from the first
-#       argument or stdin.
-#
-#     ## Usage
-#
-#     Activate the virtual environment where `latchpoint-core` is
-#     installed, then:
-#
-#         git diff > /tmp/change.diff
-#         scripts/latchpoint-check.sh /tmp/change.diff
-#
-#     Exit codes: `0` = PASS, `1` = FIX, `2` = ESCALATE or error.
-#
-#     ## Scope
-#
-#     - Local-only. No network calls, no telemetry.
-#     - Advisory. Nothing in this repo is enforced automatically by
-#       these files.
-#     - Editable. The policy is a starting point, not a production
-#       rule set.
-#
-# After creating all three files, run `ls -la .latchpoint scripts`
-# and print the result. Do NOT run `git add`, `git commit`, or
-# `git push`. Do NOT modify any other file.
+# If either exit code is non-zero, or either `verify_status` is not
+# PASS, or `replay_status` from the replay run is not REPLAY_PASS,
+# stop and report.
 
 # ---------------------------------------------------------------
 # STEP 6 — Final report
@@ -322,22 +188,19 @@ MODE: install-only        # change to: install-and-wire   if desired
 # Print a single report block with the following fields. Use exactly
 # these labels. One field per line.
 #
-#   mode: install-only | install-and-wire
 #   latchpoint_core_path: <absolute path to the clone>
 #   venv_path: <absolute path to the .venv>
 #   python_version: <output of python --version>
 #   latchpoint_core_version: <output of `pip show latchpoint-core | grep ^Version`>
-#   pass_exit: <exit code from safe.json run>           # expected 0
-#   fix_exit:  <exit code from risky.json run>          # expected 1
-#   escalate_exit: <exit code from escalate.json run>   # expected 2
-#   pack_hash_safe: <pack_hash from the safe.json run>
-#   verify_status: <verify_status line from --verify>   # expected PASS
-#   pytest_status: <pass | fail>
-#   wired_files: <comma-separated list of files created in STEP 5, or "none">
-#   skipped_files: <comma-separated list of pre-existing files skipped in STEP 5, or "none">
+#   pass_exit: <exit code from safe.json run>            # expected 0
+#   fix_exit:  <exit code from risky.json run>           # expected 1
+#   escalate_exit: <exit code from escalate.json run>    # expected 2
+#   pack_hash: <pack_hash from the safe.json run>
+#   verify_status: <verify_status line from --verify>    # expected PASS
+#   replay_status: <replay_status line from verify+replay> # expected REPLAY_PASS
 #
 # After printing the report, stop. Do not propose follow-up edits.
-# Do not push. Do not commit.
+# Do not push. Do not commit. Do not modify the user's repository.
 ```
 
 ## What the agent will NOT do
@@ -348,13 +211,11 @@ MODE: install-only        # change to: install-and-wire   if desired
 - It will not configure or run a CI workflow.
 - It will not install a pre-commit, pre-push, or any other git hook.
 - It will not stage, commit, or push changes to any repository.
-- It will not edit files outside the three advisory files listed
-  for install-and-wire mode.
+- It will not write any file outside the cloned `latchpoint-core/`
+  directory and `/tmp/latchpoint_evidence.json`.
 - It will not contact any network endpoint beyond the initial
   `git clone` and `pip install`. The only runtime dependency is
-  `PyYAML`; because STEP 3 installs the `[test]` extra,
-  `pip install` will also fetch `pytest` and its transitive
-  dependencies into the local virtual environment.
+  `PyYAML`.
 
 ## After the agent finishes
 
@@ -363,18 +224,9 @@ You can re-run the verification at any time:
 ```bash
 cd latchpoint-core
 . .venv/bin/activate
-python -m pytest -q
 latchpoint-core \
   --policy examples/policies/basic.yaml \
   --action examples/actions/safe.json
-```
-
-If you ran `install-and-wire`, the advisory wrapper inside your
-repository is invoked manually:
-
-```bash
-git diff > /tmp/change.diff
-scripts/latchpoint-check.sh /tmp/change.diff
 ```
 
 Refer to [`README.md`](README.md), [`docs/quickstart.md`](docs/quickstart.md),
