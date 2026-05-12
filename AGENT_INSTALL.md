@@ -89,6 +89,8 @@ Stop and report on any failure.
 # ---------------------------------------------------------------
 # Clone into the current working directory. If a latchpoint-core/
 # directory already exists, stop and report — do not overwrite it.
+# If you are already inside the cloned repo (the current working
+# directory is itself latchpoint-core/), do not `cd` again.
 #
 #   test ! -e latchpoint-core
 #   git clone https://github.com/tfot-ai/latchpoint-core.git
