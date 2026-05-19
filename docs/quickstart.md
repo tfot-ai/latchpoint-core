@@ -14,11 +14,17 @@ cd latchpoint-core
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
-python -m pip install -e .
+python -m pip install .
 ```
 
 The package installs the `latchpoint-core` CLI and exposes
 `latchpoint_core` as the importable Python package.
+
+This uses a standard (non-editable) install, matching the primary
+flows in [`README.md`](../README.md#install) and `AGENT_INSTALL.md`.
+Contributors who intentionally want an editable install should see the
+editable-install note in
+[`troubleshooting.md`](troubleshooting.md#modulenotfounderror-after-editable-install-on-macos).
 
 ## Check a structured action
 
