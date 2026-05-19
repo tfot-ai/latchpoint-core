@@ -234,6 +234,7 @@ See [`docs/limitations.md`](docs/limitations.md) for the full list.
 - [`docs/limitations.md`](docs/limitations.md) — the full list of what Latchpoint Core does not do.
 - [`docs/troubleshooting.md`](docs/troubleshooting.md) — recovery for the most common policy, diff, and verify failures.
 - [`docs/versioning-compatibility.md`](docs/versioning-compatibility.md) — current versioning posture and compatibility expectations for developers.
+- [`docs/integration-notes.md`](docs/integration-notes.md) — how to wire Latchpoint Core into a shell, CI, or agent-harness workflow today.
 
 ## Development
 
