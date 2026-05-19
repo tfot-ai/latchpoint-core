@@ -1,0 +1,69 @@
+# github-actions-advisory.yml — ILLUSTRATIVE EXAMPLE. NOT AN ACTIVE WORKFLOW.
+#
+# This file lives under examples/integration/ on purpose. It is NOT in
+# .github/workflows/, so GitHub will not run it. It is a sketch of one
+# way a CI job *could* invoke Latchpoint Core as an advisory check.
+#
+# To use it: copy it into your own project's .github/workflows/,
+# review it, and adapt every path. It is a starting point, not a
+# production-ready workflow.
+#
+# It is advisory / non-blocking: the `continue-on-error: true` line
+# keeps a non-zero verdict (FIX / ESCALATE) from failing the build.
+# Removing that line — promoting this to a blocking gate — is a team
+# decision to make once the policy's coverage is trusted, not a
+# default.
+#
+# See ../../docs/integration-notes.md and ../../docs/cli.md.
+
+name: latchpoint-advisory-example
+
+on:
+  pull_request:
+
+jobs:
+  advisory-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the change
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Latchpoint Core
+        run: |
+          python -m pip install --upgrade pip
+          # Pin an exact tag or commit SHA — never a moving branch.
+          # See ../../docs/versioning-compatibility.md.
+          python -m pip install \
+            "latchpoint-core @ git+https://github.com/tfot-ai/latchpoint-core.git@v0.0.1"
+
+      - name: Capture the pull-request diff
+        # The diff adapter is not a repository scanner; it sees only the
+        # unified-diff text passed via --diff. Capture it explicitly.
+        run: |
+          git diff "origin/${{ github.base_ref }}...HEAD" > change.diff
+
+      - name: Run the advisory Latchpoint check
+        # Advisory: a non-zero verdict does not fail the build.
+        continue-on-error: true
+        run: |
+          latchpoint-core \
+            --policy path/to/policy.yaml \
+            --diff change.diff \
+            --evidence-out evidence.json
+
+      - name: Upload the evidence pack
+        # Latchpoint Core writes the pack only to the local --evidence-out
+        # path. This upload is a workflow step you choose to add; Core
+        # itself does not upload anything.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: latchpoint-evidence
+          path: evidence.json

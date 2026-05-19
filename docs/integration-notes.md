@@ -62,6 +62,15 @@ descriptor and act on an exit code:
 - **Manual reviewer workflows** — a reviewer running the CLI by hand
   against a diff to get a deterministic, reproducible verdict.
 
+## Worked examples
+
+For copy-pasteable starting points — an advisory local-shell wrapper
+and an illustrative, non-blocking CI snippet — see
+[`../examples/integration/README.md`](../examples/integration/README.md).
+Those files are examples to adapt, not supported entrypoints, and they
+add no runtime behavior to Core. The CI snippet is deliberately not an
+active workflow.
+
 ## Inputs and outputs
 
 **Inputs you supply:**
@@ -202,6 +211,7 @@ of what Core does not do.
 
 ## See also
 
+- [`../examples/integration/README.md`](../examples/integration/README.md) — worked, copy-pasteable integration examples.
 - [`quickstart.md`](quickstart.md) — install, run, verify, replay.
 - [`cli.md`](cli.md) — CLI modes, flags, and arguments.
 - [`policies.md`](policies.md) — policy schema.
