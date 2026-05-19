@@ -133,9 +133,15 @@ Verify mode is selected by passing the `--verify` flag.
 | `--evidence-in` | yes      | —       | Path to an evidence-pack JSON file.                                                                                                                                      |
 | `--policy`      | no       | —       | YAML policy file. Required when `--action` is supplied. Used together with `--action` to replay the recorded gate decision.                                              |
 | `--action`      | no       | —       | JSON action descriptor. Required when `--policy` is supplied.                                                                                                            |
+| `--override`    | no       | —       | Path to a JSON object describing the override decision recorded in the evidence pack. Triggers override-aware replay: the recorded outcome is re-evaluated against the supplied inputs and an `override_replay_status` line is reported. Same JSON shape as the `run`-mode `--override` flag. |
+| `--ledger`      | no       | —       | Path to a JSON-array ledger chain file. Triggers ledger-aware replay: the chain must hash-verify end to end and the recorded `pack_hash` must appear in it exactly once. Unlike `run` mode, the path must already exist; a missing path is a configuration error and fails closed. |
 
 `--policy` and `--action` must both be supplied or both omitted.
 Supplying exactly one is a configuration error and fails closed.
+
+`--override` and `--ledger` are optional companion replay checks. They
+are independent of basic evidence-hash verification, which needs only
+`--evidence-in`.
 
 ### Stdout
 
@@ -145,18 +151,32 @@ pack_hash: <recomputed pack hash>
 replay_status: REPLAY_PASS|REPLAY_FAIL|NOT_REPLAYABLE
 reason: <one line per verify reason>
 replay_reason: <one line per replay reason>
+override_replay_status: OVERRIDE_REPLAY_PASS|OVERRIDE_REPLAY_FAIL|OVERRIDE_NOT_REPLAYABLE|OVERRIDE_NOT_PRESENT
+override_replay_reason: <one line per override replay reason>
+ledger_replay_status: LEDGER_REPLAY_PASS|LEDGER_REPLAY_FAIL|LEDGER_NOT_REPLAYABLE
+ledger_replay_reason: <one line per ledger replay reason>
 ```
 
 `replay_status` is `REPLAY_PASS` when the supplied policy + action
 reproduce the recorded decision, `REPLAY_FAIL` on any mismatch, and
 `NOT_REPLAYABLE` when `--policy` or `--action` is omitted.
 
+`override_replay_status` is `OVERRIDE_NOT_PRESENT` when `--override`
+is omitted, `OVERRIDE_NOT_REPLAYABLE` when an override is present but
+replay inputs are absent, and `OVERRIDE_REPLAY_PASS` /
+`OVERRIDE_REPLAY_FAIL` when the recorded override is re-evaluated.
+`ledger_replay_status` is `LEDGER_NOT_REPLAYABLE` when `--ledger` is
+omitted, and `LEDGER_REPLAY_PASS` / `LEDGER_REPLAY_FAIL` when a chain
+is checked. On `LEDGER_REPLAY_PASS`, three further lines —
+`ledger_replay_sequence`, `ledger_replay_prev_hash`, and
+`ledger_replay_entry_hash` — record the matched chain entry.
+
 ### Exit codes
 
 | Code | Meaning                                                                                                  |
 |------|----------------------------------------------------------------------------------------------------------|
-| `0`  | `verify_status: PASS` and `replay_status` ∈ `{REPLAY_PASS, NOT_REPLAYABLE}`.                              |
-| `2`  | `verify_status: FAIL`, `replay_status: REPLAY_FAIL`, malformed input, missing file, or unreadable file.  |
+| `0`  | `verify_status: PASS`, `replay_status` ∈ `{REPLAY_PASS, NOT_REPLAYABLE}`, and neither `override_replay_status` nor `ledger_replay_status` is a `*_REPLAY_FAIL`. |
+| `2`  | `verify_status: FAIL`, any `REPLAY_FAIL` / `OVERRIDE_REPLAY_FAIL` / `LEDGER_REPLAY_FAIL`, malformed input, missing file, or unreadable file. |
 
 ### Example — hash check only
 
