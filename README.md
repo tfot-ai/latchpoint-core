@@ -235,6 +235,7 @@ See [`docs/limitations.md`](docs/limitations.md) for the full list.
 - [`docs/troubleshooting.md`](docs/troubleshooting.md) — recovery for the most common policy, diff, and verify failures.
 - [`docs/versioning-compatibility.md`](docs/versioning-compatibility.md) — current versioning posture and compatibility expectations for developers.
 - [`docs/integration-notes.md`](docs/integration-notes.md) — how to wire Latchpoint Core into a shell, CI, or agent-harness workflow today.
+- [`examples/integration/README.md`](examples/integration/README.md) — worked, copy-pasteable shell and CI integration examples.
 
 ## Development
 
