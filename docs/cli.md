@@ -161,10 +161,12 @@ ledger_replay_reason: <one line per ledger replay reason>
 reproduce the recorded decision, `REPLAY_FAIL` on any mismatch, and
 `NOT_REPLAYABLE` when `--policy` or `--action` is omitted.
 
-`override_replay_status` is `OVERRIDE_NOT_PRESENT` when `--override`
-is omitted, `OVERRIDE_NOT_REPLAYABLE` when an override is present but
-replay inputs are absent, and `OVERRIDE_REPLAY_PASS` /
-`OVERRIDE_REPLAY_FAIL` when the recorded override is re-evaluated.
+`override_replay_status` is `OVERRIDE_NOT_PRESENT` when the evidence
+pack records no override and no override-replay inputs are supplied,
+`OVERRIDE_NOT_REPLAYABLE` when the pack does record an override but
+override-replay inputs are absent (for example, `--override` is
+omitted), and `OVERRIDE_REPLAY_PASS` / `OVERRIDE_REPLAY_FAIL` when the
+recorded override is re-evaluated.
 `ledger_replay_status` is `LEDGER_NOT_REPLAYABLE` when `--ledger` is
 omitted, and `LEDGER_REPLAY_PASS` / `LEDGER_REPLAY_FAIL` when a chain
 is checked. On `LEDGER_REPLAY_PASS`, three further lines —
